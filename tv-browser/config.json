@@ -1,0 +1,29 @@
+{
+  // Where the launcher lives. Its address is always allowed.
+  "homeUrl": "https://pineapple752.github.io/tv-launcher/",
+
+  // false: videos can go fullscreen and the Home button follows them in.
+  // true:  sites can never go fullscreen, so pages stay windowed with the Home button always in place.
+  "blockFullscreen": false,
+
+  // A domain also allows all of its subdomains.
+  // Use a longer name like "accounts.google.com" to allow just that part of a site.
+  "allowedDomains": [
+    "youtube.com", "youtu.be", "googlevideo.com", "ytimg.com",
+    "accounts.google.com", "consent.google.com",
+    "netflix.com",
+    "primevideo.com", "amazon.com",
+    "disneyplus.com", "disney.com",
+    "hulu.com",
+    "hbomax.com", "max.com", "hbo.com",
+    "apple.com",
+    "paramountplus.com",
+    "peacocktv.com",
+    "twitch.tv",
+    "crunchyroll.com",
+    "spotify.com",
+    "plex.tv",
+    "tubitv.com",
+    "pluto.tv"
+  ]
+}

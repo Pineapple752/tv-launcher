@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "+EOjB4Ne6lc=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\harsh\\OneDrive\\TV thingy\\tv-browser\\TVBrowser.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\harsh\\.nuget\\packages\\microsoft.web.webview2\\1.0.4314.35\\microsoft.web.webview2.1.0.4314.35.nupkg.sha512"
+  ],
+  "logs": []
+}

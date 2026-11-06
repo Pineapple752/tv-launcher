@@ -1,0 +1,20 @@
+{
+  "homeUrl": "https://pineapple752.github.io/tv-launcher/",
+  "allowedDomains": [
+    "youtube.com", "youtu.be", "google.com", "googlevideo.com", "ytimg.com",
+    "netflix.com",
+    "primevideo.com", "amazon.com",
+    "disneyplus.com", "disney.com",
+    "hulu.com",
+    "hbomax.com", "max.com", "hbo.com",
+    "apple.com",
+    "paramountplus.com",
+    "peacocktv.com",
+    "twitch.tv",
+    "crunchyroll.com",
+    "spotify.com",
+    "plex.tv",
+    "tubitv.com",
+    "pluto.tv"
+  ]
+}
