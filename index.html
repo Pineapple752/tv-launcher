@@ -16,7 +16,7 @@
     --muted: #9aa3b5;
     --surface: rgba(255,255,255,.09);
     --gutter: 4.5vw;
-    --a: #d6283e;      /* accent, changed from Settings */
+    --a: #d6283e;
     --base: #07080c;
     font-size: clamp(14px, 1.05vw, 26px);
   }
@@ -36,7 +36,7 @@
   #app { height: 100%; display: flex; flex-direction: column; position: relative; z-index: 1; }
 
   /* swirling background */
-  #bg { position: fixed; inset: 0; overflow: hidden; z-index: 0; background: var(--base); }
+  #bg { position: fixed; inset: 0; overflow: hidden; z-index: 0; background: var(--base); will-change: transform; }
   .swirl {
     position: absolute; width: 170vmax; height: 170vmax; border-radius: 50%;
     margin: -85vmax 0 0 -85vmax; will-change: transform;
@@ -126,6 +126,7 @@
     transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
     opacity: 0;
     pointer-events: none;
+    will-change: transform, opacity;
   }
   .top-taskbar.visible {
     transform: translateX(-50%) translateY(0);
@@ -180,6 +181,7 @@
     transition: transform .18s ease, box-shadow .18s ease;
     text-shadow: 0 1px 8px rgba(0,0,0,.25);
     overflow: hidden;
+    will-change: transform;
   }
   .tile .logo {
     width: 3.6rem; height: 3.6rem; object-fit: contain; border-radius: .85rem;
@@ -259,7 +261,7 @@
     <svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M10 20v-6h4v6"/></svg>
   </button>
   <button class="icon-btn" id="tbSetBtn" data-f aria-label="Settings / Return to Desktop">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l-.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1-.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1-.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l-.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l-.1-.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1-.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
   </button>
 </div>
 
@@ -280,7 +282,7 @@
         <svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
       </button>
       <button class="icon-btn" id="setBtn" data-f aria-label="Settings">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l-.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1-.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1-.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l-.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l-.1-.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1-.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
       </button>
     </div>
   </header>
@@ -334,7 +336,6 @@
   let pinHash  = store.get('tv.pin', null);
   let unlockedUntil = 0;
 
-  // Force YouTube to standard desktop URL to prevent leanback TV interface takeover
   apps = apps.map(a => a.id === 'youtube' ? { ...a, url: 'https://www.youtube.com' } : a);
 
   const THEMES = [
@@ -426,7 +427,7 @@
     if (target) target.focus(); else $('#searchBtn').focus();
   }
 
-  /* ---------- launching (Open in new tab to preserve Edge browser chrome) ---------- */
+  /* ---------- launching ---------- */
   function launch(a) {
     recent = [a.id, ...recent.filter(id => id !== a.id)].slice(0, 12);
     store.set('tv.recent', recent);
@@ -668,7 +669,7 @@
         }, 'danger'),
         btn('Close', () => closeModal()),
         el('p', { className: 'hint', textContent: 'Kiosk mode hides the mouse cursor and blocks right-clicks.' }),
-        el('p', { className: 'hint', textContent: 'Arrow keys move. Enter opens. Hold Enter or press E for app options. S searches, F toggles fullscreen, Esc goes back.' })
+        el('p', { className: 'hint', textContent: 'Arrow keys move. Enter opens. Hold Enter or press E for app options. S searches, F toggles fullscreen, Ctrl+H goes home.' })
       );
     });
   }
@@ -744,6 +745,13 @@
   let holdTimer = null, held = false;
 
   document.addEventListener('keydown', e => {
+    // Global Ctrl + H shortcut to go home from anywhere
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'h') {
+      e.preventDefault();
+      goHome();
+      return;
+    }
+
     if (settings.kiosk) {
       const k = e.key.toLowerCase();
       if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['i', 'j', 'c'].includes(k)) ||
@@ -820,10 +828,11 @@
     }
   }
 
-  /* ---------- taskbar bindings & proximity trigger ---------- */
+  /* ---------- taskbar bindings & proximity trigger with performance throttling ---------- */
   const topTaskbar = $('#topTaskbar');
   const triggerZone = $('#topTriggerZone');
   let hideTaskbarTimer;
+  let ticking = false;
 
   function updateTriggerZoneHeight() {
     triggerZone.style.height = (settings.triggerHeight || 80) + 'px';
@@ -856,10 +865,16 @@
 
   document.addEventListener('mousemove', e => {
     wakeCursor();
-    if (e.clientY <= (settings.triggerHeight || 80)) {
-      showTaskbar();
+    if (!ticking) {
+      window.requestAnimationFrame(() => {
+        if (e.clientY <= (settings.triggerHeight || 80)) {
+          showTaskbar();
+        }
+        ticking = false;
+      });
+      ticking = true;
     }
-  });
+  }, { passive: true });
 
   /* ---------- kiosk helpers ---------- */
   let cursorTimer;
