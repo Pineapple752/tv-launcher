@@ -98,6 +98,33 @@
   .pad .btn { justify-content: center; text-align: center; font-size: 1.5rem; padding: .8rem; }
   .pad .gap { visibility: hidden; }
 
+  /* top sliding task bar */
+  .top-taskbar {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100%);
+    background: rgba(15, 18, 25, 0.9);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-top: none;
+    border-radius: 0 0 1.2rem 1.2rem;
+    padding: 0.6rem 1.5rem;
+    display: flex;
+    gap: 1.2rem;
+    align-items: center;
+    z-index: 1000;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .top-taskbar.visible {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
   /* header */
   header {
     display: flex; align-items: center; justify-content: space-between;
@@ -119,7 +146,7 @@
     display: grid; place-items: center; transition: background .15s, transform .15s;
   }
   svg { width: 1.4rem; height: 1.4rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  .search:focus, .icon-btn:focus {
+  .search:focus, .icon-btn:focus, .top-taskbar .icon-btn:focus {
     background: #fff; color: #10131a; transform: scale(1.06);
   }
 
@@ -217,6 +244,16 @@
 <body>
 <div id="bg" aria-hidden="true"><div class="swirl s1"></div><div class="swirl s2"></div><div class="glow g1"></div><div class="glow g2"></div><div class="shade"></div></div>
 
+<!-- Top extending task bar with exactly 2 buttons: Back/Home and Settings/Desktop -->
+<div id="topTaskbar" class="top-taskbar">
+  <button class="icon-btn" id="tbHomeBtn" data-f aria-label="Home">
+    <svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M10 20v-6h4v6"/></svg>
+  </button>
+  <button class="icon-btn" id="tbSetBtn" data-f aria-label="Settings / Desktop">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1-.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1-.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+  </button>
+</div>
+
 <div id="app">
   <header>
     <div class="left">
@@ -234,7 +271,7 @@
         <svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
       </button>
       <button class="icon-btn" id="setBtn" data-f aria-label="Settings">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1-.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1-.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
       </button>
     </div>
   </header>
@@ -296,7 +333,6 @@
   const applyTheme = () => document.documentElement.style.setProperty('--a', theme.a);
   const applyKiosk = () => { if (!settings.kiosk) document.body.classList.remove('hide-cursor'); };
 
-  // older saved lists used the /tv address for YouTube
   apps = apps.map(a => a.id === 'youtube' && /youtube\.com\/tv\/?$/.test(a.url) ? { ...a, url: 'https://www.youtube.com' } : a);
 
   const saveApps = () => store.set('tv.apps', apps);
@@ -339,7 +375,6 @@
   }
 
   /* ---------- rendering ---------- */
-  // logo sources, tried in order: your own file in /logos, then the site's own icon
   function logoSources(a) {
     const list = ['logos/' + a.id + '.png'];
     try { list.push('https://www.google.com/s2/favicons?sz=128&domain=' + new URL(a.url).hostname); } catch {}
@@ -397,7 +432,6 @@
       }
     }, 350);
   }
-  // coming back via the browser's Back button
   window.addEventListener('pageshow', () => $('#launch').classList.remove('on'));
 
   /* ---------- modals ---------- */
@@ -519,7 +553,6 @@
       return 'x' + h;
     }
   }
-  // returns true when the action may run now; otherwise asks for the PIN and re-runs fn
   function guard(fn) {
     if (!pinHash || Date.now() < unlockedUntil) return true;
     pinPad('Enter PIN', async pin => {
@@ -629,7 +662,7 @@
           closeModal(false); render();
         }, 'danger'),
         btn('Close', () => closeModal()),
-        el('p', { className: 'hint', textContent: 'Kiosk mode keeps the launcher fullscreen, hides the mouse cursor, blocks right-click and developer shortcuts, and always opens apps in this tab. A page can’t block system keys like Ctrl+W or Alt+F4, so use the kiosk-setup files for a full lockdown.' }),
+        el('p', { className: 'hint', textContent: 'Kiosk mode keeps the launcher fullscreen, hides the mouse cursor, blocks right-click and developer shortcuts, and always opens apps in this tab.' }),
         el('p', { className: 'hint', textContent: 'Arrow keys move. Enter opens. Hold Enter or press E for app options. S searches, F toggles fullscreen, Esc goes back.' })
       );
     });
@@ -638,7 +671,6 @@
   async function goFullscreen() {
     try {
       await document.documentElement.requestFullscreen({ navigationUI: 'hide' });
-      // where supported (Chrome, Edge), keep Esc, Alt+Tab and the Windows key inside the page
       await navigator.keyboard?.lock?.(['Escape', 'AltLeft', 'AltRight', 'Tab', 'MetaLeft', 'MetaRight']);
     } catch {}
   }
@@ -724,7 +756,7 @@
       return;
     }
     const tile = e.target.closest?.('.tile[data-id]');
-    if (e.key === 'Enter' && tile) {            // hold Enter for options
+    if (e.key === 'Enter' && tile) {
       e.preventDefault();
       if (!e.repeat) {
         held = false;
@@ -758,6 +790,44 @@
   $('#setBtn').addEventListener('click', openSettings);
   $('#fsBtn').addEventListener('click', toggleFullscreen);
 
+  /* ---------- return to desktop function ---------- */
+  function returnToDesktop() {
+    try {
+      if (window.opener) {
+        window.close();
+      } else {
+        window.location.href = 'about:blank';
+      }
+    } catch {
+      window.location.href = 'about:blank';
+    }
+  }
+
+  /* ---------- taskbar bindings & proximity trigger ---------- */
+  const topTaskbar = $('#topTaskbar');
+  let hideTaskbarTimer;
+
+  $('#tbHomeBtn').addEventListener('click', goHome);
+  $('#tbSetBtn').addEventListener('click', returnToDesktop);
+
+  document.addEventListener('mousemove', e => {
+    wakeCursor();
+    if (e.clientY <= 30) {
+      clearTimeout(hideTaskbarTimer);
+      topTaskbar.classList.add('visible');
+    } else if (e.clientY > 90) {
+      if (!topTaskbar.matches(':hover')) {
+        topTaskbar.classList.remove('visible');
+      }
+    }
+  });
+
+  topTaskbar.addEventListener('mouseleave', e => {
+    if (e.clientY > 90) {
+      topTaskbar.classList.remove('visible');
+    }
+  });
+
   /* ---------- kiosk helpers ---------- */
   let cursorTimer;
   function wakeCursor() {
@@ -765,9 +835,7 @@
     clearTimeout(cursorTimer);
     if (settings.kiosk) cursorTimer = setTimeout(() => document.body.classList.add('hide-cursor'), 3000);
   }
-  document.addEventListener('mousemove', wakeCursor);
   document.addEventListener('contextmenu', e => { if (settings.kiosk) e.preventDefault(); });
-  // browsers only allow fullscreen after a key press or click, so re-enter on the next one
   let triedFs = false;
   ['keydown', 'pointerdown'].forEach(t => document.addEventListener(t, () => {
     if (document.fullscreenElement) return;
