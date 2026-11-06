@@ -1,0 +1,15 @@
+C:\Users\harsh\OneDrive\TV thingy\tv-browser\publish\TVBrowser.exe
+C:\Users\harsh\OneDrive\TV thingy\tv-browser\publish\runtimes\win-x86\native\WebView2Loader.dll
+C:\Users\harsh\OneDrive\TV thingy\tv-browser\publish\runtimes\win-x64\native\WebView2Loader.dll
+C:\Users\harsh\OneDrive\TV thingy\tv-browser\publish\runtimes\win-arm64\native\WebView2Loader.dll
+C:\Users\harsh\OneDrive\TV thingy\tv-browser\publish\config.json
+C:\Users\harsh\OneDrive\TV thingy\tv-browser\publish\TVBrowser.dll
+C:\Users\harsh\OneDrive\TV thingy\tv-browser\publish\TVBrowser.deps.json
+C:\Users\harsh\OneDrive\TV thingy\tv-browser\publish\TVBrowser.runtimeconfig.json
+C:\Users\harsh\OneDrive\TV thingy\tv-browser\publish\TVBrowser.pdb
+C:\Users\harsh\OneDrive\TV thingy\tv-browser\publish\Microsoft.Web.WebView2.Core.dll
+C:\Users\harsh\OneDrive\TV thingy\tv-browser\publish\Microsoft.Web.WebView2.WinForms.dll
+C:\Users\harsh\OneDrive\TV thingy\tv-browser\publish\Microsoft.Web.WebView2.Wpf.dll
+C:\Users\harsh\OneDrive\TV thingy\tv-browser\publish\Microsoft.Web.WebView2.Core.xml
+C:\Users\harsh\OneDrive\TV thingy\tv-browser\publish\Microsoft.Web.WebView2.WinForms.xml
+C:\Users\harsh\OneDrive\TV thingy\tv-browser\publish\Microsoft.Web.WebView2.Wpf.xml
