@@ -98,24 +98,32 @@
   .pad .btn { justify-content: center; text-align: center; font-size: 1.5rem; padding: .8rem; }
   .pad .gap { visibility: hidden; }
 
-  /* top sliding task bar */
+  /* top sliding task bar & trigger zone */
+  #topTriggerZone {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    pointer-events: auto;
+  }
   .top-taskbar {
     position: fixed;
     top: 0;
     left: 50%;
     transform: translateX(-50%) translateY(-100%);
-    background: rgba(15, 18, 25, 0.9);
+    background: rgba(15, 18, 25, 0.95);
     backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-top: none;
     border-radius: 0 0 1.2rem 1.2rem;
-    padding: 0.6rem 1.5rem;
+    padding: 0.6rem 1.8rem;
     display: flex;
     gap: 1.2rem;
     align-items: center;
     z-index: 1000;
-    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6);
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
     opacity: 0;
     pointer-events: none;
   }
@@ -244,13 +252,14 @@
 <body>
 <div id="bg" aria-hidden="true"><div class="swirl s1"></div><div class="swirl s2"></div><div class="glow g1"></div><div class="glow g2"></div><div class="shade"></div></div>
 
-<!-- Top extending task bar with exactly 2 buttons: Back/Home and Settings/Desktop -->
+<!-- Trigger zone and top extending task bar with exactly 2 buttons: Back/Home and Settings/Desktop -->
+<div id="topTriggerZone"></div>
 <div id="topTaskbar" class="top-taskbar">
   <button class="icon-btn" id="tbHomeBtn" data-f aria-label="Home">
     <svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M10 20v-6h4v6"/></svg>
   </button>
-  <button class="icon-btn" id="tbSetBtn" data-f aria-label="Settings / Desktop">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1-.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1-.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+  <button class="icon-btn" id="tbSetBtn" data-f aria-label="Settings / Return to Desktop">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l-.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1-.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1-.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1 z"/></svg>
   </button>
 </div>
 
@@ -271,7 +280,7 @@
         <svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
       </button>
       <button class="icon-btn" id="setBtn" data-f aria-label="Settings">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1-.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1-.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l-.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1-.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1-.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
       </button>
     </div>
   </header>
@@ -311,6 +320,7 @@
     { id: 'pluto',      name: 'Pluto TV',     url: 'https://pluto.tv',                    color: '#2f3a7a' }
   ];
   const SWATCHES = ['#e5173f','#d96a0a','#b87a00','#14864a','#0b7fc2','#1d5bd6','#5b2bd6','#c2185b','#3a3d45'];
+  const ZONE_SIZES = [30, 50, 80, 120, 150];
 
   const store = {
     get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
@@ -319,7 +329,7 @@
 
   let apps     = store.get('tv.apps', DEFAULT_APPS);
   let recent   = store.get('tv.recent', []);
-  let settings = { newTab: false, kiosk: false, fullscreen: true, ...store.get('tv.settings', {}) };
+  let settings = { newTab: false, kiosk: false, fullscreen: true, triggerHeight: 80, ...store.get('tv.settings', {}) };
   let theme    = store.get('tv.theme', { a: '#d6283e' });
   let pinHash  = store.get('tv.pin', null);
   let unlockedUntil = 0;
@@ -631,6 +641,14 @@
   function openSettings() {
     if (!guard(openSettings)) return;
     openModal('Settings', card => {
+      const zoneBtn = btn('Top bar trigger zone height', () => {
+        const idx = ZONE_SIZES.indexOf(settings.triggerHeight);
+        settings.triggerHeight = ZONE_SIZES[(idx + 1) % ZONE_SIZES.length];
+        store.set('tv.settings', settings);
+        updateTriggerZoneHeight();
+        zoneBtn.lastChild.textContent = settings.triggerHeight + 'px';
+      }, '', settings.triggerHeight + 'px');
+
       const tabBtn = btn('Open apps in', () => {
         settings.newTab = !settings.newTab; store.set('tv.settings', settings);
         tabBtn.lastChild.textContent = settings.newTab ? 'New tab' : 'This tab';
@@ -651,6 +669,7 @@
       }, '', pinHash ? 'On, select to remove' : 'Off');
       card.append(
         btn('Background colors', openColors),
+        zoneBtn,
         fsBtn,
         kioskBtn,
         pinBtn,
@@ -793,11 +812,13 @@
   /* ---------- return to desktop function ---------- */
   function returnToDesktop() {
     try {
-      if (window.opener) {
-        window.close();
-      } else {
-        window.location.href = 'about:blank';
+      if (window.chrome?.webview) {
+        window.chrome.webview.postMessage('exit');
       }
+      window.close();
+      setTimeout(() => {
+        window.location.href = 'about:blank';
+      }, 100);
     } catch {
       window.location.href = 'about:blank';
     }
@@ -805,26 +826,42 @@
 
   /* ---------- taskbar bindings & proximity trigger ---------- */
   const topTaskbar = $('#topTaskbar');
+  const triggerZone = $('#topTriggerZone');
   let hideTaskbarTimer;
+
+  function updateTriggerZoneHeight() {
+    triggerZone.style.height = (settings.triggerHeight || 80) + 'px';
+  }
+
+  function showTaskbar() {
+    clearTimeout(hideTaskbarTimer);
+    topTaskbar.classList.add('visible');
+  }
+
+  function hideTaskbar() {
+    if (!topTaskbar.matches(':hover') && !triggerZone.matches(':hover')) {
+      topTaskbar.classList.remove('visible');
+    }
+  }
 
   $('#tbHomeBtn').addEventListener('click', goHome);
   $('#tbSetBtn').addEventListener('click', returnToDesktop);
 
-  document.addEventListener('mousemove', e => {
-    wakeCursor();
-    if (e.clientY <= 30) {
-      clearTimeout(hideTaskbarTimer);
-      topTaskbar.classList.add('visible');
-    } else if (e.clientY > 90) {
-      if (!topTaskbar.matches(':hover')) {
-        topTaskbar.classList.remove('visible');
-      }
-    }
+  triggerZone.addEventListener('mouseenter', showTaskbar);
+  triggerZone.addEventListener('mousemove', showTaskbar);
+  triggerZone.addEventListener('mouseleave', () => {
+    hideTaskbarTimer = setTimeout(hideTaskbar, 300);
   });
 
-  topTaskbar.addEventListener('mouseleave', e => {
-    if (e.clientY > 90) {
-      topTaskbar.classList.remove('visible');
+  topTaskbar.addEventListener('mouseenter', showTaskbar);
+  topTaskbar.addEventListener('mouseleave', () => {
+    hideTaskbarTimer = setTimeout(hideTaskbar, 300);
+  });
+
+  document.addEventListener('mousemove', e => {
+    wakeCursor();
+    if (e.clientY <= (settings.triggerHeight || 80)) {
+      showTaskbar();
     }
   });
 
@@ -844,6 +881,7 @@
 
   /* ---------- start ---------- */
   applyTheme();
+  updateTriggerZoneHeight();
   showDefaultHero();
   render();
   wakeCursor();
