@@ -16,7 +16,7 @@
     --muted: #9aa3b5;
     --surface: rgba(255,255,255,.09);
     --gutter: 4.5vw;
-    --a: #d6283e;
+    --a: #d6283e;      /* accent, changed from Settings */
     --base: #07080c;
     font-size: clamp(14px, 1.05vw, 26px);
   }
@@ -36,7 +36,7 @@
   #app { height: 100%; display: flex; flex-direction: column; position: relative; z-index: 1; }
 
   /* swirling background */
-  #bg { position: fixed; inset: 0; overflow: hidden; z-index: 0; background: var(--base); will-change: transform; }
+  #bg { position: fixed; inset: 0; overflow: hidden; z-index: 0; background: var(--base); }
   .swirl {
     position: absolute; width: 170vmax; height: 170vmax; border-radius: 50%;
     margin: -85vmax 0 0 -85vmax; will-change: transform;
@@ -98,42 +98,6 @@
   .pad .btn { justify-content: center; text-align: center; font-size: 1.5rem; padding: .8rem; }
   .pad .gap { visibility: hidden; }
 
-  /* top sliding task bar & trigger zone */
-  #topTriggerZone {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 999;
-    pointer-events: auto;
-  }
-  .top-taskbar {
-    position: fixed;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%) translateY(-100%);
-    background: rgba(15, 18, 25, 0.95);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-top: none;
-    border-radius: 0 0 1.2rem 1.2rem;
-    padding: 0.6rem 1.8rem;
-    display: flex;
-    gap: 1.2rem;
-    align-items: center;
-    z-index: 1000;
-    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7);
-    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
-    opacity: 0;
-    pointer-events: none;
-    will-change: transform, opacity;
-  }
-  .top-taskbar.visible {
-    transform: translateX(-50%) translateY(0);
-    opacity: 1;
-    pointer-events: auto;
-  }
-
   /* header */
   header {
     display: flex; align-items: center; justify-content: space-between;
@@ -155,7 +119,7 @@
     display: grid; place-items: center; transition: background .15s, transform .15s;
   }
   svg { width: 1.4rem; height: 1.4rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  .search:focus, .icon-btn:focus, .top-taskbar .icon-btn:focus {
+  .search:focus, .icon-btn:focus {
     background: #fff; color: #10131a; transform: scale(1.06);
   }
 
@@ -181,7 +145,6 @@
     transition: transform .18s ease, box-shadow .18s ease;
     text-shadow: 0 1px 8px rgba(0,0,0,.25);
     overflow: hidden;
-    will-change: transform;
   }
   .tile .logo {
     width: 3.6rem; height: 3.6rem; object-fit: contain; border-radius: .85rem;
@@ -228,8 +191,8 @@
   .swatches { display: flex; flex-wrap: wrap; gap: .6rem; padding: .3rem 0; }
   .sw { width: 2.4rem; height: 2.4rem; border-radius: 50%; background: var(--c); box-shadow: inset 0 0 0 .14rem rgba(255,255,255,.2); }
   .sw:focus { box-shadow: 0 0 0 .2rem #fff; transform: scale(1.12); }
-  .sw[aria-pressed="true"] { box-shadow: 0 0 0 #171b25, 0 0 0 .38rem rgba(255,255,255,.7); }
-  .sw[aria-pressed="true"]:focus { box-shadow: 0 0 0 #171b25, 0 0 0 .4rem #fff; }
+  .sw[aria-pressed="true"] { box-shadow: 0 0 0 .2rem #171b25, 0 0 0 .38rem rgba(255,255,255,.7); }
+  .sw[aria-pressed="true"]:focus { box-shadow: 0 0 0 .2rem #171b25, 0 0 0 .4rem #fff; }
   .err { color: #ff8b8b; font-size: .95rem; min-height: 1.2em; }
 
   #launch {
@@ -238,6 +201,14 @@
     opacity: 0; pointer-events: none; transition: opacity .25s;
   }
   #launch.on { opacity: 1; pointer-events: auto; }
+
+  #notice {
+    position: fixed; left: 50%; bottom: 6vh; transform: translateX(-50%); z-index: 30;
+    max-width: 80vw; padding: 1rem 1.6rem; border-radius: .9rem; text-align: center;
+    background: #171b25; font-weight: 600; font-size: 1.1rem; line-height: 1.4;
+    box-shadow: 0 1rem 3rem rgba(0,0,0,.6);
+  }
+  #notice[hidden] { display: none; }
 
   @media (prefers-reduced-motion: reduce) {
     * { transition: none !important; animation: none !important; }
@@ -254,17 +225,6 @@
 <body>
 <div id="bg" aria-hidden="true"><div class="swirl s1"></div><div class="swirl s2"></div><div class="glow g1"></div><div class="glow g2"></div><div class="shade"></div></div>
 
-<!-- Trigger zone and top extending task bar with exactly 2 buttons: Back/Home and Settings/Desktop -->
-<div id="topTriggerZone"></div>
-<div id="topTaskbar" class="top-taskbar">
-  <button class="icon-btn" id="tbHomeBtn" data-f aria-label="Home">
-    <svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M10 20v-6h4v6"/></svg>
-  </button>
-  <button class="icon-btn" id="tbSetBtn" data-f aria-label="Settings / Return to Desktop">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l-.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l-.1-.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1-.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
-  </button>
-</div>
-
 <div id="app">
   <header>
     <div class="left">
@@ -273,16 +233,13 @@
     </button>
     <button class="search" id="searchBtn" data-f>
       <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-      <span>Search apps or the web</span>
+      <span>Search apps or YouTube</span>
     </button>
     </div>
     <div class="right">
       <div id="clock" aria-live="off"></div>
-      <button class="icon-btn" id="fsBtn" data-f aria-label="Toggle fullscreen">
-        <svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
-      </button>
       <button class="icon-btn" id="setBtn" data-f aria-label="Settings">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l-.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l-.1-.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1-.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
       </button>
     </div>
   </header>
@@ -297,6 +254,7 @@
 
 <div id="modal" hidden></div>
 <div id="launch" aria-live="polite"></div>
+<div id="notice" role="status" aria-live="polite" hidden></div>
 
 <script>
 (() => {
@@ -322,36 +280,47 @@
     { id: 'pluto',      name: 'Pluto TV',     url: 'https://pluto.tv',                    color: '#2f3a7a' }
   ];
   const SWATCHES = ['#e5173f','#d96a0a','#b87a00','#14864a','#0b7fc2','#1d5bd6','#5b2bd6','#c2185b','#3a3d45'];
-  const ZONE_SIZES = [30, 50, 80, 120, 150];
-
-  const store = {
-    get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
-    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
-  };
-
-  let apps     = store.get('tv.apps', DEFAULT_APPS);
-  let recent   = store.get('tv.recent', []);
-  let settings = { kiosk: false, fullscreen: false, triggerHeight: 80, ...store.get('tv.settings', {}) };
-  let theme    = store.get('tv.theme', { a: '#d6283e' });
-  let pinHash  = store.get('tv.pin', null);
-  let unlockedUntil = 0;
-
-  apps = apps.map(a => a.id === 'youtube' ? { ...a, url: 'https://www.youtube.com' } : a);
-
   const THEMES = [
     { name: 'Crimson', a: '#d6283e' }, { name: 'Ember',   a: '#ff7a1a' },
     { name: 'Rose',    a: '#ff4fa3' }, { name: 'Violet',  a: '#8b5cf6' },
     { name: 'Ocean',   a: '#1e90ff' }, { name: 'Emerald', a: '#10b981' },
     { name: 'Steel',   a: '#8b95a7' }
   ];
+  // Apps whose logo you've saved as logos/<id>.png next to this file. Everything else uses the site's own icon.
+  const LOCAL_LOGOS = [];
+  const HEX = /^#[0-9a-f]{6}$/i;
+
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+  };
+
+  // saved data can be missing or damaged; never let that blank the screen
+  function cleanApps(v) {
+    if (!Array.isArray(v)) return null;
+    return v
+      .filter(a => a && typeof a.id === 'string' && typeof a.name === 'string' && typeof a.url === 'string')
+      .map(a => ({ id: a.id, name: a.name, url: a.url, color: HEX.test(a.color) ? a.color : '#3a3d45' }));
+  }
+  let apps = cleanApps(store.get('tv.apps', null)) || DEFAULT_APPS.map(a => ({ ...a }));
+  let recent = store.get('tv.recent', []);
+  if (!Array.isArray(recent)) recent = [];
+  let theme = store.get('tv.theme', null);
+  if (!theme || !HEX.test(theme.a)) theme = { a: '#d6283e' };
+  let pinHash = store.get('tv.pin', null);
+  if (typeof pinHash !== 'string') pinHash = null;
+  let unlockedUntil = 0, failCount = 0, lockedUntil = 0;
+
   const applyTheme = () => document.documentElement.style.setProperty('--a', theme.a);
-  const applyKiosk = () => { if (!settings.kiosk) document.body.classList.remove('hide-cursor'); };
+
+  // older saved lists used the /tv address for YouTube
+  apps = apps.map(a => a.id === 'youtube' && /youtube\.com\/tv\/?$/.test(a.url) ? { ...a, url: 'https://www.youtube.com' } : a);
 
   const saveApps = () => store.set('tv.apps', apps);
 
   /* ---------- helpers ---------- */
   const $ = (s, r = document) => r.querySelector(s);
-  const rowsEl = $('#rows'), modalEl = $('#modal'), appEl = $('#app');
+  const rowsEl = $('#rows'), modalEl = $('#modal'), appEl = $('#app'), noticeEl = $('#notice'), launchEl = $('#launch');
   const heroTitle = $('#heroTitle'), heroSub = $('#heroSub');
 
   function el(tag, props = {}, ...kids) {
@@ -370,10 +339,31 @@
   const host = u => { try { return new URL(u).host.replace(/^www\./, ''); } catch { return u; } };
   const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'app';
 
+  let noticeTimer = 0;
+  function notify(text) {
+    noticeEl.textContent = text; noticeEl.hidden = false;
+    clearTimeout(noticeTimer);
+    noticeTimer = setTimeout(() => { noticeEl.hidden = true; }, 7000);
+  }
+
+  /* ---------- messages from the TV Browser app ---------- */
+  // The app tells us which sites it allows, and tells us when it blocked a link.
+  let allowed = null;   // null = not running inside the app, so no restriction
+  const hostAllowed = h => !allowed || allowed.some(d => h === d || h.endsWith('.' + d));
+  const bridge = window.chrome && window.chrome.webview;
+  if (bridge) bridge.addEventListener('message', e => {
+    const m = e.data;
+    if (!m || typeof m !== 'object') return;
+    if (m.type === 'config' && Array.isArray(m.allowed)) allowed = m.allowed.map(d => String(d).toLowerCase());
+    if (m.type === 'blocked') {
+      endLaunch();
+      notify('“' + String(m.host) + '” isn’t on this TV’s allowed list. Add it to config.json to open it.');
+    }
+  });
+
   /* ---------- clock + greeting ---------- */
   function tick() {
-    const d = new Date();
-    $('#clock').textContent = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    $('#clock').textContent = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
   }
   setInterval(tick, 10000); tick();
 
@@ -388,7 +378,8 @@
 
   /* ---------- rendering ---------- */
   function logoSources(a) {
-    const list = ['logos/' + a.id + '.png'];
+    const list = [];
+    if (LOCAL_LOGOS.includes(a.id)) list.push('logos/' + a.id + '.png');
     try { list.push('https://www.google.com/s2/favicons?sz=128&domain=' + new URL(a.url).hostname); } catch {}
     return list;
   }
@@ -396,15 +387,18 @@
     const t = el('button', { className: 'tile', type: 'button' });
     t.style.setProperty('--c', a.color);
     const srcs = logoSources(a);
-    const img = el('img', { className: 'logo', alt: '', draggable: false });
-    let i = 0;
-    img.onerror = () => {
-      i++;
-      if (i < srcs.length) img.src = srcs[i];
-      else { img.remove(); t.classList.add('no-logo'); }
-    };
-    img.src = srcs[0];
-    t.append(img, el('span', { textContent: a.name }));
+    if (srcs.length) {
+      const img = el('img', { className: 'logo', alt: '', draggable: false });
+      let i = 0;
+      img.onerror = () => {
+        i++;
+        if (i < srcs.length) img.src = srcs[i];
+        else { img.remove(); t.classList.add('no-logo'); }
+      };
+      img.src = srcs[0];
+      t.append(img);
+    } else t.classList.add('no-logo');
+    t.append(el('span', { textContent: a.name }));
     t.dataset.f = ''; t.dataset.id = a.id;
     t.addEventListener('click', () => launch(a));
     t.addEventListener('contextmenu', e => { e.preventDefault(); openOptions(a); });
@@ -428,18 +422,26 @@
   }
 
   /* ---------- launching ---------- */
-  function launch(a) {
-    recent = [a.id, ...recent.filter(id => id !== a.id)].slice(0, 12);
-    store.set('tv.recent', recent);
-    const overlay = $('#launch');
-    overlay.textContent = 'Opening ' + a.name;
-    overlay.classList.add('on');
-    setTimeout(() => {
-      window.open(a.url, '_blank', 'noopener');
-      overlay.classList.remove('on');
-      render(a.id);
-    }, 350);
+  let launching = false, launchTimer = 0;
+  function endLaunch() {
+    launching = false; clearTimeout(launchTimer);
+    launchEl.classList.remove('on');
   }
+  function launch(a) {
+    if (launching) return;
+    launching = true;
+    if (!a.id.startsWith('_')) {           // searches aren't apps, so they don't go in "Recently opened"
+      recent = [a.id, ...recent.filter(id => id !== a.id)].slice(0, 12);
+      store.set('tv.recent', recent);
+    }
+    launchEl.textContent = 'Opening ' + a.name;
+    launchEl.classList.add('on');
+    setTimeout(() => { location.href = a.url; }, 350);
+    // if nothing happens (blocked or offline) don't leave the screen stuck
+    launchTimer = setTimeout(endLaunch, 12000);
+  }
+  // coming back via the browser's Back button
+  window.addEventListener('pageshow', endLaunch);
 
   /* ---------- modals ---------- */
   let lastFocus = null, padKey = null;
@@ -517,7 +519,12 @@
           if (!n) { err.textContent = 'Enter a name for the app.'; name.focus(); return; }
           if (!u) { err.textContent = 'Enter the website address.'; url.focus(); return; }
           if (!/^https?:\/\//i.test(u)) u = 'https://' + u;
-          try { new URL(u); } catch { err.textContent = 'That address doesn’t look right. Try something like example.com.'; url.focus(); return; }
+          let parsed;
+          try { parsed = new URL(u); } catch { err.textContent = 'That address doesn’t look right. Try something like example.com.'; url.focus(); return; }
+          if (!hostAllowed(parsed.hostname.toLowerCase())) {
+            err.textContent = 'This TV only opens sites listed in config.json. Add “' + parsed.hostname + '” there first.';
+            url.focus(); return;
+          }
           let id = slug(n); while (apps.some(a => a.id === id)) id += '-2';
           apps.push({ id, name: n, url: u, color }); saveApps();
           closeModal(false); render(id);
@@ -529,24 +536,20 @@
 
   function openSearch() {
     openModal('Search', card => {
-      const input = el('input', { className: 'field', placeholder: 'Type an app name or something to look up', autocomplete: 'off' });
+      const input = el('input', { className: 'field', placeholder: 'Type an app name or something to look up on YouTube', autocomplete: 'off' });
       input.dataset.f = '';
       const results = el('div', { style: 'display:flex;flex-direction:column;gap:.7rem' });
       card.append(input, results);
-      const draw = () => {
+      const go = u => { closeModal(false); launch({ id: '_search', name: 'YouTube', url: u }); };
+      input.addEventListener('input', () => {
         const q = input.value.trim();
         results.replaceChildren();
         if (!q) return;
         apps.filter(a => a.name.toLowerCase().includes(q.toLowerCase())).slice(0, 5)
           .forEach(a => results.append(btn(a.name, () => { closeModal(false); launch(a); }, '', host(a.url))));
-        const enc = encodeURIComponent(q);
-        results.append(
-          btn('Search YouTube for “' + q + '”', () => go('https://www.youtube.com/results?search_query=' + enc)),
-          btn('Search the web for “' + q + '”', () => go('https://www.google.com/search?q=' + enc))
-        );
-      };
-      const go = u => { closeModal(false); launch({ id: '_search', name: 'results', url: u }); };
-      input.addEventListener('input', draw);
+        results.append(btn('Search YouTube for “' + q + '”',
+          () => go('https://www.youtube.com/results?search_query=' + encodeURIComponent(q))));
+      });
     });
   }
 
@@ -560,10 +563,17 @@
       return 'x' + h;
     }
   }
+  // returns true when the action may run now; otherwise asks for the PIN and re-runs fn
   function guard(fn) {
     if (!pinHash || Date.now() < unlockedUntil) return true;
     pinPad('Enter PIN', async pin => {
-      if (await hashPin(pin) !== pinHash) return 'Wrong PIN. Try again.';
+      const wait = lockedUntil - Date.now();
+      if (wait > 0) return 'Too many tries. Wait ' + Math.ceil(wait / 1000) + ' seconds.';
+      if (await hashPin(pin) !== pinHash) {
+        if (++failCount >= 5) { failCount = 0; lockedUntil = Date.now() + 30000; return 'Too many tries. Locked for 30 seconds.'; }
+        return 'Wrong PIN. Try again.';
+      }
+      failCount = 0;
       unlockedUntil = Date.now() + 120000;
       fn();
       return null;
@@ -604,18 +614,20 @@
         if (second !== first) return 'Those didn’t match. Try again.';
         pinHash = await hashPin(first); store.set('tv.pin', pinHash);
         unlockedUntil = Date.now() + 120000;
-        openSettings();
+        showSettings();
         return null;
       });
       return null;
     });
   }
 
-  /* ---------- background colours ---------- */
+  /* ---------- background colors ---------- */
   function setAccent(c) { theme = { a: c }; store.set('tv.theme', theme); applyTheme(); }
   function openColors() {
     openModal('Background colors', card => {
       const marks = [];
+      const custom = el('input', { className: 'field', placeholder: 'Custom color, like #1e90ff', maxLength: 7 });
+      custom.dataset.f = '';
       const refresh = () => marks.forEach(([b, c]) => { b.lastChild.textContent = c.toLowerCase() === theme.a.toLowerCase() ? 'Selected' : ''; });
       THEMES.forEach(t => {
         const b = btn(t.name, () => { setAccent(t.a); custom.value = ''; refresh(); }, '', ' ');
@@ -623,76 +635,47 @@
         b.prepend(el('span', { style: 'display:flex;align-items:center;gap:.8rem' }, dot, b.firstChild));
         marks.push([b, t.a]); card.append(b);
       });
-      const custom = el('input', { className: 'field', placeholder: 'Custom color, like #1e90ff', maxLength: 7 });
-      custom.dataset.f = '';
       custom.addEventListener('input', () => {
         const v = custom.value.trim().replace(/^#/, '');
         if (/^[0-9a-f]{6}$/i.test(v)) { setAccent('#' + v); refresh(); }
       });
-      card.append(custom, btn('Done', () => openSettings()));
+      card.append(custom, btn('Done', () => showSettings()));
       refresh();
     }, true);
   }
 
   /* ---------- settings ---------- */
-  function openSettings() {
-    if (!guard(openSettings)) return;
+  function openSettings() { if (guard(openSettings)) showSettings(); }
+  function showSettings() {
     openModal('Settings', card => {
-      const zoneBtn = btn('Top bar trigger zone height', () => {
-        const idx = ZONE_SIZES.indexOf(settings.triggerHeight);
-        settings.triggerHeight = ZONE_SIZES[(idx + 1) % ZONE_SIZES.length];
-        store.set('tv.settings', settings);
-        updateTriggerZoneHeight();
-        zoneBtn.lastChild.textContent = settings.triggerHeight + 'px';
-      }, '', (settings.triggerHeight || 80) + 'px');
-
-      const kioskBtn = btn('Kiosk mode', () => {
-        settings.kiosk = !settings.kiosk; store.set('tv.settings', settings);
-        applyKiosk(); wakeCursor();
-        if (settings.kiosk) toggleFullscreen();
-        kioskBtn.lastChild.textContent = settings.kiosk ? 'On' : 'Off';
-      }, '', settings.kiosk ? 'On' : 'Off');
       const pinBtn = btn('PIN lock for settings', () => {
-        if (pinHash) { pinHash = null; store.set('tv.pin', null); openSettings(); }
+        if (pinHash) { pinHash = null; store.set('tv.pin', null); showSettings(); }
         else setPin();
       }, '', pinHash ? 'On, select to remove' : 'Off');
+
+      // two presses so a stray button press on the remote can't wipe your apps
+      let armed = false, armTimer = 0;
+      const resetBtn = btn('Reset apps to default', () => {
+        if (!armed) {
+          armed = true;
+          resetBtn.firstChild.textContent = 'Select again to confirm';
+          armTimer = setTimeout(() => { armed = false; resetBtn.firstChild.textContent = 'Reset apps to default'; }, 4000);
+          return;
+        }
+        clearTimeout(armTimer);
+        apps = DEFAULT_APPS.map(a => ({ ...a })); recent = [];
+        saveApps(); store.set('tv.recent', recent);
+        closeModal(false); render();
+      }, 'danger');
+
       card.append(
         btn('Background colors', openColors),
-        zoneBtn,
-        kioskBtn,
         pinBtn,
-        btn('Fullscreen', toggleFullscreen),
-        btn('Reset apps to default', () => {
-          apps = DEFAULT_APPS.map(a => ({ ...a })); recent = [];
-          saveApps(); store.set('tv.recent', recent);
-          closeModal(false); render();
-        }, 'danger'),
+        resetBtn,
         btn('Close', () => closeModal()),
-        el('p', { className: 'hint', textContent: 'Kiosk mode hides the mouse cursor and blocks right-clicks.' }),
-        el('p', { className: 'hint', textContent: 'Arrow keys move. Enter opens. Hold Enter or press E for app options. S searches, F toggles fullscreen, Ctrl+H goes home.' })
+        el('p', { className: 'hint', textContent: 'Arrow keys move. Enter opens. Hold Enter or press E for app options. S searches, Home returns here, Esc goes back.' })
       );
     });
-  }
-
-  async function goFullscreen() {
-    try {
-      if (!document.fullscreenElement) {
-        await document.documentElement.requestFullscreen({ navigationUI: 'hide' });
-        await navigator.keyboard?.lock?.(['Escape', 'AltLeft', 'AltRight', 'Tab', 'MetaLeft', 'MetaRight']);
-      }
-    } catch {}
-  }
-  function exitFullscreen() {
-    try {
-      if (document.fullscreenElement) {
-        navigator.keyboard?.unlock?.();
-        document.exitFullscreen();
-      }
-    } catch {}
-  }
-  function toggleFullscreen() {
-    if (document.fullscreenElement) { exitFullscreen(); }
-    else { goFullscreen(); }
   }
 
   /* ---------- hero follows focus ---------- */
@@ -710,7 +693,7 @@
     }
     if (t.dataset.add !== undefined) {
       heroTitle.textContent = 'Add an app';
-      heroSub.textContent = 'Put any website on your home screen.';
+      heroSub.textContent = 'Put any allowed website on your home screen.';
       return;
     }
     showDefaultHero();
@@ -723,7 +706,7 @@
   }
   function navigate(dir) {
     const list = focusables();
-    let cur = document.activeElement;
+    const cur = document.activeElement;
     if (!list.includes(cur)) { list[0]?.focus(); return; }
     const r = cur.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
     let best = null, bestScore = Infinity;
@@ -742,28 +725,18 @@
   }
 
   const KEYS = { ArrowRight: 'right', ArrowLeft: 'left', ArrowDown: 'down', ArrowUp: 'up' };
-  let holdTimer = null, held = false;
+  let holdTimer = 0, held = false, enterTile = null;
 
   document.addEventListener('keydown', e => {
-    // Global Ctrl + H shortcut to go home from anywhere
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'h') {
-      e.preventDefault();
-      goHome();
-      return;
-    }
-
-    if (settings.kiosk) {
-      const k = e.key.toLowerCase();
-      if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['i', 'j', 'c'].includes(k)) ||
-          (e.ctrlKey && ['u', 's', 'p'].includes(k))) { e.preventDefault(); return; }
-    }
     if (e.key === 'BrowserHome' || (e.key === 'Home' && e.target.tagName !== 'INPUT')) { e.preventDefault(); goHome(); return; }
     if (e.altKey || e.ctrlKey || e.metaKey) return;
+    const inField = e.target.tagName === 'INPUT';
+    // holding OK must never re-press whatever button is focused (for example "Open" right after a long press)
+    if (e.key === 'Enter' && e.repeat && !inField) { e.preventDefault(); return; }
     if (padKey && modalOpen()) {
       if (/^[0-9]$/.test(e.key)) { e.preventDefault(); padKey(e.key); return; }
       if (e.key === 'Backspace') { e.preventDefault(); padKey('⌫'); return; }
     }
-    const inField = e.target.tagName === 'INPUT';
     const dir = KEYS[e.key];
 
     if (dir) {
@@ -779,26 +752,26 @@
       return;
     }
     const tile = e.target.closest?.('.tile[data-id]');
-    if (e.key === 'Enter' && tile) {
+    if (e.key === 'Enter' && tile) {            // tap opens the app, hold opens its options
       e.preventDefault();
-      if (!e.repeat) {
-        held = false;
-        holdTimer = setTimeout(() => { held = true; openOptions(apps.find(a => a.id === tile.dataset.id)); }, 650);
-      }
+      enterTile = tile; held = false;
+      clearTimeout(holdTimer);
+      holdTimer = setTimeout(() => { held = true; openOptions(apps.find(a => a.id === tile.dataset.id)); }, 650);
       return;
     }
     if (modalOpen()) return;
     if (tile && (e.key === 'e' || e.key === 'E' || e.key === 'ContextMenu' || e.key === 'm')) {
       e.preventDefault(); openOptions(apps.find(a => a.id === tile.dataset.id)); return;
     }
-    if (e.key === 'f' || e.key === 'F') { e.preventDefault(); toggleFullscreen(); }
     if (e.key === 's' || e.key === 'S' || e.key === '/') { e.preventDefault(); openSearch(); }
   });
   document.addEventListener('keyup', e => {
     if (e.key !== 'Enter') return;
     clearTimeout(holdTimer);
-    const tile = e.target.closest?.('.tile[data-id]');
-    if (tile && !held && !modalOpen()) tile.click();
+    // only a press that started on this tile may open it, so pressing Enter on a
+    // dialog button can't "click through" to the tile underneath when the dialog closes
+    const t = enterTile; enterTile = null;
+    if (t && !held && !modalOpen() && document.activeElement === t) t.click();
     held = false;
   });
 
@@ -811,83 +784,18 @@
   $('#homeBtn').addEventListener('click', goHome);
   $('#searchBtn').addEventListener('click', openSearch);
   $('#setBtn').addEventListener('click', openSettings);
-  $('#fsBtn').addEventListener('click', toggleFullscreen);
 
-  /* ---------- return to desktop function ---------- */
-  function returnToDesktop() {
-    try {
-      if (window.chrome?.webview) {
-        window.chrome.webview.postMessage('exit');
-      }
-      window.close();
-      setTimeout(() => {
-        window.location.href = 'about:blank';
-      }, 100);
-    } catch {
-      window.location.href = 'about:blank';
-    }
-  }
-
-  /* ---------- taskbar bindings & proximity trigger with performance throttling ---------- */
-  const topTaskbar = $('#topTaskbar');
-  const triggerZone = $('#topTriggerZone');
-  let hideTaskbarTimer;
-  let ticking = false;
-
-  function updateTriggerZoneHeight() {
-    triggerZone.style.height = (settings.triggerHeight || 80) + 'px';
-  }
-
-  function showTaskbar() {
-    clearTimeout(hideTaskbarTimer);
-    topTaskbar.classList.add('visible');
-  }
-
-  function hideTaskbar() {
-    if (!topTaskbar.matches(':hover') && !triggerZone.matches(':hover')) {
-      topTaskbar.classList.remove('visible');
-    }
-  }
-
-  $('#tbHomeBtn').addEventListener('click', goHome);
-  $('#tbSetBtn').addEventListener('click', returnToDesktop);
-
-  triggerZone.addEventListener('mouseenter', showTaskbar);
-  triggerZone.addEventListener('mousemove', showTaskbar);
-  triggerZone.addEventListener('mouseleave', () => {
-    hideTaskbarTimer = setTimeout(hideTaskbar, 300);
-  });
-
-  topTaskbar.addEventListener('mouseenter', showTaskbar);
-  topTaskbar.addEventListener('mouseleave', () => {
-    hideTaskbarTimer = setTimeout(hideTaskbar, 300);
-  });
-
-  document.addEventListener('mousemove', e => {
-    wakeCursor();
-    if (!ticking) {
-      window.requestAnimationFrame(() => {
-        if (e.clientY <= (settings.triggerHeight || 80)) {
-          showTaskbar();
-        }
-        ticking = false;
-      });
-      ticking = true;
-    }
-  }, { passive: true });
-
-  /* ---------- kiosk helpers ---------- */
-  let cursorTimer;
+  /* ---------- hide the mouse cursor when it's idle ---------- */
+  let cursorTimer = 0;
   function wakeCursor() {
     document.body.classList.remove('hide-cursor');
     clearTimeout(cursorTimer);
-    if (settings.kiosk) cursorTimer = setTimeout(() => document.body.classList.add('hide-cursor'), 3000);
+    cursorTimer = setTimeout(() => document.body.classList.add('hide-cursor'), 3000);
   }
-  document.addEventListener('contextmenu', e => { if (settings.kiosk) e.preventDefault(); });
+  document.addEventListener('mousemove', wakeCursor);
 
   /* ---------- start ---------- */
   applyTheme();
-  updateTriggerZoneHeight();
   showDefaultHero();
   render();
   wakeCursor();
