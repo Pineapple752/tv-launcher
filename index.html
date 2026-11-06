@@ -259,7 +259,7 @@
     <svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M10 20v-6h4v6"/></svg>
   </button>
   <button class="icon-btn" id="tbSetBtn" data-f aria-label="Settings / Return to Desktop">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l-.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1-.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1-.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1 z"/></svg>
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l-.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1-.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1-.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
   </button>
 </div>
 
@@ -329,7 +329,7 @@
 
   let apps     = store.get('tv.apps', DEFAULT_APPS);
   let recent   = store.get('tv.recent', []);
-  let settings = { newTab: false, kiosk: false, fullscreen: true, triggerHeight: 80, ...store.get('tv.settings', {}) };
+  let settings = { kiosk: false, fullscreen: false, triggerHeight: 80, ...store.get('tv.settings', {}) };
   let theme    = store.get('tv.theme', { a: '#d6283e' });
   let pinHash  = store.get('tv.pin', null);
   let unlockedUntil = 0;
@@ -425,7 +425,7 @@
     if (target) target.focus(); else $('#searchBtn').focus();
   }
 
-  /* ---------- launching ---------- */
+  /* ---------- launching (Open in new tab to preserve Edge browser chrome) ---------- */
   function launch(a) {
     recent = [a.id, ...recent.filter(id => id !== a.id)].slice(0, 12);
     store.set('tv.recent', recent);
@@ -433,16 +433,11 @@
     overlay.textContent = 'Opening ' + a.name;
     overlay.classList.add('on');
     setTimeout(() => {
-      if (settings.newTab && !settings.kiosk) {
-        window.open(a.url, '_blank', 'noopener');
-        overlay.classList.remove('on');
-        render(a.id);
-      } else {
-        location.href = a.url;
-      }
+      window.open(a.url, '_blank', 'noopener');
+      overlay.classList.remove('on');
+      render(a.id);
     }, 350);
   }
-  window.addEventListener('pageshow', () => $('#launch').classList.remove('on'));
 
   /* ---------- modals ---------- */
   let lastFocus = null, padKey = null;
@@ -647,22 +642,14 @@
         store.set('tv.settings', settings);
         updateTriggerZoneHeight();
         zoneBtn.lastChild.textContent = settings.triggerHeight + 'px';
-      }, '', settings.triggerHeight + 'px');
+      }, '', (settings.triggerHeight || 80) + 'px');
 
-      const tabBtn = btn('Open apps in', () => {
-        settings.newTab = !settings.newTab; store.set('tv.settings', settings);
-        tabBtn.lastChild.textContent = settings.newTab ? 'New tab' : 'This tab';
-      }, '', settings.newTab ? 'New tab' : 'This tab');
       const kioskBtn = btn('Kiosk mode', () => {
         settings.kiosk = !settings.kiosk; store.set('tv.settings', settings);
         applyKiosk(); wakeCursor();
-        if (settings.kiosk) goFullscreen();
+        if (settings.kiosk) toggleFullscreen();
         kioskBtn.lastChild.textContent = settings.kiosk ? 'On' : 'Off';
       }, '', settings.kiosk ? 'On' : 'Off');
-      const fsBtn = btn('Fullscreen on start', () => {
-        settings.fullscreen = !settings.fullscreen; store.set('tv.settings', settings);
-        fsBtn.lastChild.textContent = settings.fullscreen ? 'On' : 'Off';
-      }, '', settings.fullscreen ? 'On' : 'Off');
       const pinBtn = btn('PIN lock for settings', () => {
         if (pinHash) { pinHash = null; store.set('tv.pin', null); openSettings(); }
         else setPin();
@@ -670,10 +657,8 @@
       card.append(
         btn('Background colors', openColors),
         zoneBtn,
-        fsBtn,
         kioskBtn,
         pinBtn,
-        tabBtn,
         btn('Fullscreen', toggleFullscreen),
         btn('Reset apps to default', () => {
           apps = DEFAULT_APPS.map(a => ({ ...a })); recent = [];
@@ -681,7 +666,7 @@
           closeModal(false); render();
         }, 'danger'),
         btn('Close', () => closeModal()),
-        el('p', { className: 'hint', textContent: 'Kiosk mode keeps the launcher fullscreen, hides the mouse cursor, blocks right-click and developer shortcuts, and always opens apps in this tab.' }),
+        el('p', { className: 'hint', textContent: 'Kiosk mode hides the mouse cursor and blocks right-clicks.' }),
         el('p', { className: 'hint', textContent: 'Arrow keys move. Enter opens. Hold Enter or press E for app options. S searches, F toggles fullscreen, Esc goes back.' })
       );
     });
@@ -689,13 +674,23 @@
 
   async function goFullscreen() {
     try {
-      await document.documentElement.requestFullscreen({ navigationUI: 'hide' });
-      await navigator.keyboard?.lock?.(['Escape', 'AltLeft', 'AltRight', 'Tab', 'MetaLeft', 'MetaRight']);
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen({ navigationUI: 'hide' });
+        await navigator.keyboard?.lock?.(['Escape', 'AltLeft', 'AltRight', 'Tab', 'MetaLeft', 'MetaRight']);
+      }
+    } catch {}
+  }
+  function exitFullscreen() {
+    try {
+      if (document.fullscreenElement) {
+        navigator.keyboard?.unlock?.();
+        document.exitFullscreen();
+      }
     } catch {}
   }
   function toggleFullscreen() {
-    if (document.fullscreenElement) { navigator.keyboard?.unlock?.(); document.exitFullscreen(); }
-    else goFullscreen();
+    if (document.fullscreenElement) { exitFullscreen(); }
+    else { goFullscreen(); }
   }
 
   /* ---------- hero follows focus ---------- */
@@ -873,11 +868,6 @@
     if (settings.kiosk) cursorTimer = setTimeout(() => document.body.classList.add('hide-cursor'), 3000);
   }
   document.addEventListener('contextmenu', e => { if (settings.kiosk) e.preventDefault(); });
-  let triedFs = false;
-  ['keydown', 'pointerdown'].forEach(t => document.addEventListener(t, () => {
-    if (document.fullscreenElement) return;
-    if (settings.kiosk || (settings.fullscreen && !triedFs)) { triedFs = true; goFullscreen(); }
-  }, true));
 
   /* ---------- start ---------- */
   applyTheme();
