@@ -1,0 +1,785 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>TV Home</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b0d12">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📺</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0d12;
+    --text: #f4f6fb;
+    --muted: #9aa3b5;
+    --surface: rgba(255,255,255,.09);
+    --gutter: 4.5vw;
+    --a: #d6283e;      /* accent, changed from Settings */
+    --base: #07080c;
+    font-size: clamp(14px, 1.05vw, 26px);
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    overflow: hidden;
+    cursor: default;
+  }
+  button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; }
+  input { font: inherit; color: inherit; }
+  :focus { outline: none; }
+
+  #app { height: 100%; display: flex; flex-direction: column; position: relative; z-index: 1; }
+
+  /* swirling background */
+  #bg { position: fixed; inset: 0; overflow: hidden; z-index: 0; background: var(--base); }
+  .swirl {
+    position: absolute; width: 170vmax; height: 170vmax; border-radius: 50%;
+    margin: -85vmax 0 0 -85vmax; will-change: transform;
+    -webkit-mask-image: radial-gradient(closest-side, transparent 5%, #000 26%, #000 68%, transparent 100%);
+            mask-image: radial-gradient(closest-side, transparent 5%, #000 26%, #000 68%, transparent 100%);
+  }
+  .s1 {
+    left: 22%; top: 28%; opacity: .9;
+    background: conic-gradient(from 0deg,
+      var(--base),
+      color-mix(in srgb, var(--a) 33%, var(--base)) 12%,
+      var(--base) 25%,
+      color-mix(in srgb, var(--a) 70%, var(--base)) 40%,
+      var(--base) 55%,
+      color-mix(in srgb, var(--a) 42%, var(--base)) 70%,
+      var(--base) 85%,
+      color-mix(in srgb, var(--a) 25%, var(--base)) 94%,
+      var(--base));
+    animation: spin 80s linear infinite;
+  }
+  .s2 {
+    left: 78%; top: 72%; opacity: .7;
+    background: conic-gradient(from 90deg,
+      var(--base),
+      color-mix(in srgb, var(--a) 48%, var(--base)) 10%,
+      var(--base) 28%,
+      color-mix(in srgb, var(--a) 55%, var(--base)) 45%,
+      var(--base) 60%,
+      color-mix(in srgb, var(--a) 85%, var(--base)) 74%,
+      var(--base) 90%,
+      var(--base));
+    animation: spin 110s linear infinite reverse;
+  }
+  .glow {
+    position: absolute; width: 70vmax; height: 70vmax; border-radius: 50%; will-change: transform;
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--a) 34%, transparent), transparent);
+  }
+  .g1 { left: -10vmax; top: -15vmax; animation: drift1 38s ease-in-out infinite alternate; }
+  .g2 {
+    right: -15vmax; bottom: -20vmax;
+    background: radial-gradient(closest-side, color-mix(in srgb, color-mix(in srgb, var(--a) 55%, var(--base)) 50%, transparent), transparent);
+    animation: drift2 52s ease-in-out infinite alternate;
+  }
+  .shade {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse at 50% 40%, transparent 30%, rgba(5, 6, 9, .6) 100%),
+      linear-gradient(to bottom, rgba(5, 6, 9, .15), rgba(5, 6, 9, .5));
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes drift1 { to { transform: translate(28vw, 22vh) scale(1.2); } }
+  @keyframes drift2 { to { transform: translate(-26vw, -18vh) scale(1.15); } }
+
+  body.hide-cursor, body.hide-cursor * { cursor: none !important; }
+  #modal.peek { background: rgba(5, 6, 10, .3); backdrop-filter: none; }
+  .btn .dot { width: 1.5rem; height: 1.5rem; border-radius: 50%; box-shadow: inset 0 0 0 .12rem rgba(255,255,255,.25); flex: none; }
+  .dots { font-size: 1.8rem; letter-spacing: .7rem; text-align: center; padding: .4rem 0 .6rem; }
+  .pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: .6rem; }
+  .pad .btn { justify-content: center; text-align: center; font-size: 1.5rem; padding: .8rem; }
+  .pad .gap { visibility: hidden; }
+
+  /* header */
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 2.2vh var(--gutter) 0;
+    gap: 1.5rem;
+  }
+  .search {
+    display: flex; align-items: center; gap: .8rem;
+    background: var(--surface); border-radius: 99rem;
+    padding: .75rem 1.5rem .75rem 1.1rem; color: var(--muted);
+    min-width: 20rem; text-align: left;
+    transition: background .15s, color .15s, transform .15s;
+  }
+  .left { display: flex; align-items: center; gap: 1rem; }
+  .right { display: flex; align-items: center; gap: 1rem; }
+  #clock { font-weight: 600; font-size: 1.15rem; margin-right: .5rem; font-variant-numeric: tabular-nums; }
+  .icon-btn {
+    width: 3rem; height: 3rem; border-radius: 50%; background: var(--surface);
+    display: grid; place-items: center; transition: background .15s, transform .15s;
+  }
+  svg { width: 1.4rem; height: 1.4rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .search:focus, .icon-btn:focus {
+    background: #fff; color: #10131a; transform: scale(1.06);
+  }
+
+  /* hero info */
+  .hero { padding: 7vh var(--gutter) 2vh; min-height: 34vh; display: flex; flex-direction: column; justify-content: flex-end; }
+  .hero h1 { font-size: 4.2rem; line-height: 1.02; font-weight: 800; letter-spacing: -.02em; }
+  .hero p { margin-top: .9rem; color: var(--muted); font-size: 1.2rem; max-width: 40rem; line-height: 1.4; }
+
+  /* rows */
+  #rows { flex: 1; overflow-y: auto; scrollbar-width: none; padding-bottom: 8vh; }
+  #rows::-webkit-scrollbar, .row::-webkit-scrollbar { display: none; }
+  .row-block h2 { font-size: 1.25rem; font-weight: 700; padding: 0 var(--gutter); margin-top: .6rem; }
+  .row {
+    display: flex; gap: 1.1rem; overflow-x: auto; scrollbar-width: none;
+    padding: 1.4rem var(--gutter) 1.6rem; scroll-padding-inline: var(--gutter);
+  }
+  .tile {
+    flex: 0 0 15rem; aspect-ratio: 16 / 9; border-radius: .9rem;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .55rem;
+    padding: .8rem; text-align: center;
+    font-weight: 800; font-size: 1.15rem; letter-spacing: -.01em; line-height: 1.05; color: #fff;
+    background: linear-gradient(145deg, color-mix(in srgb, var(--c) 100%, white 14%), color-mix(in srgb, var(--c) 100%, black 38%));
+    transition: transform .18s ease, box-shadow .18s ease;
+    text-shadow: 0 1px 8px rgba(0,0,0,.25);
+    overflow: hidden;
+  }
+  .tile .logo {
+    width: 3.6rem; height: 3.6rem; object-fit: contain; border-radius: .85rem;
+    background: rgba(255,255,255,.96); padding: .4rem; box-shadow: 0 .3rem .9rem rgba(0,0,0,.35);
+  }
+  .tile.no-logo { font-size: 1.55rem; }
+  .tile.add {
+    background: transparent; color: var(--muted); text-shadow: none;
+    border: .16rem dashed rgba(255,255,255,.25); font-size: 1.2rem; font-weight: 600;
+  }
+  .tile:focus {
+    transform: scale(1.1); z-index: 2;
+    box-shadow: 0 0 0 .2rem #fff, 0 1.2rem 2.6rem rgba(0,0,0,.55);
+  }
+  .tile.add:focus { color: #fff; border-color: transparent; background: rgba(255,255,255,.14); }
+
+  /* modal */
+  #modal {
+    position: fixed; inset: 0; background: rgba(5,6,10,.72); backdrop-filter: blur(10px);
+    display: grid; place-items: center; z-index: 10;
+  }
+  #modal[hidden] { display: none; }
+  .card {
+    width: min(34rem, 92vw); background: #171b25; border-radius: 1.2rem; padding: 1.8rem;
+    display: flex; flex-direction: column; gap: .7rem; box-shadow: 0 2rem 5rem rgba(0,0,0,.6);
+    max-height: 90vh; overflow-y: auto; scrollbar-width: none;
+  }
+  .card h2 { font-size: 1.6rem; font-weight: 800; margin-bottom: .4rem; }
+  .card .hint { color: var(--muted); font-size: .95rem; line-height: 1.5; }
+  .btn {
+    text-align: left; padding: .9rem 1.2rem; border-radius: .8rem; background: var(--surface);
+    font-weight: 600; font-size: 1.1rem; transition: background .12s, color .12s;
+    display: flex; justify-content: space-between; gap: 1rem; align-items: center;
+  }
+  .btn small { color: inherit; opacity: .65; font-weight: 600; }
+  .btn:focus { background: #fff; color: #10131a; }
+  .btn.danger:focus { background: #ff6b6b; color: #1a0000; }
+  .field {
+    width: 100%; padding: .9rem 1.1rem; border-radius: .8rem; background: var(--surface);
+    border: .14rem solid transparent; font-size: 1.1rem;
+  }
+  .field::placeholder { color: var(--muted); }
+  .field:focus { border-color: #fff; background: rgba(255,255,255,.14); }
+  .swatches { display: flex; flex-wrap: wrap; gap: .6rem; padding: .3rem 0; }
+  .sw { width: 2.4rem; height: 2.4rem; border-radius: 50%; background: var(--c); box-shadow: inset 0 0 0 .14rem rgba(255,255,255,.2); }
+  .sw:focus { box-shadow: 0 0 0 .2rem #fff; transform: scale(1.12); }
+  .sw[aria-pressed="true"] { box-shadow: 0 0 0 .2rem #171b25, 0 0 0 .38rem rgba(255,255,255,.7); }
+  .sw[aria-pressed="true"]:focus { box-shadow: 0 0 0 .2rem #171b25, 0 0 0 .4rem #fff; }
+  .err { color: #ff8b8b; font-size: .95rem; min-height: 1.2em; }
+
+  #launch {
+    position: fixed; inset: 0; z-index: 20; display: grid; place-items: center;
+    background: var(--bg); font-size: 2rem; font-weight: 700;
+    opacity: 0; pointer-events: none; transition: opacity .25s;
+  }
+  #launch.on { opacity: 1; pointer-events: auto; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+  @media (max-width: 700px) {
+    :root { --gutter: 5vw; }
+    .search { min-width: 0; flex: 1; }
+    #clock { display: none; }
+    .hero h1 { font-size: 2.8rem; }
+    .tile { flex-basis: 12rem; }
+  }
+</style>
+</head>
+<body>
+<div id="bg" aria-hidden="true"><div class="swirl s1"></div><div class="swirl s2"></div><div class="glow g1"></div><div class="glow g2"></div><div class="shade"></div></div>
+
+<div id="app">
+  <header>
+    <div class="left">
+    <button class="icon-btn" id="homeBtn" data-f aria-label="Home">
+      <svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M10 20v-6h4v6"/></svg>
+    </button>
+    <button class="search" id="searchBtn" data-f>
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <span>Search apps or the web</span>
+    </button>
+    </div>
+    <div class="right">
+      <div id="clock" aria-live="off"></div>
+      <button class="icon-btn" id="fsBtn" data-f aria-label="Toggle fullscreen">
+        <svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+      </button>
+      <button class="icon-btn" id="setBtn" data-f aria-label="Settings">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1 id="heroTitle"></h1>
+    <p id="heroSub"></p>
+  </section>
+
+  <main id="rows"></main>
+</div>
+
+<div id="modal" hidden></div>
+<div id="launch" aria-live="polite"></div>
+
+<script>
+(() => {
+  'use strict';
+
+  /* ---------- data ---------- */
+  const DEFAULT_APPS = [
+    { id: 'youtube',    name: 'YouTube',      url: 'https://www.youtube.com',             color: '#e5173f' },
+    { id: 'netflix',    name: 'Netflix',      url: 'https://www.netflix.com/browse',      color: '#b20710' },
+    { id: 'prime',      name: 'Prime Video',  url: 'https://www.primevideo.com',          color: '#0b7fc2' },
+    { id: 'disney',     name: 'Disney+',      url: 'https://www.disneyplus.com',          color: '#1b3a8f' },
+    { id: 'hulu',       name: 'Hulu',         url: 'https://www.hulu.com',                color: '#1a9e63' },
+    { id: 'hbomax',     name: 'HBO Max',      url: 'https://www.hbomax.com',              color: '#5b2bd6' },
+    { id: 'appletv',    name: 'Apple TV',     url: 'https://tv.apple.com',                color: '#3a3d45' },
+    { id: 'paramount',  name: 'Paramount+',   url: 'https://www.paramountplus.com',       color: '#1d5bd6' },
+    { id: 'peacock',    name: 'Peacock',      url: 'https://www.peacocktv.com',           color: '#2b2f38' },
+    { id: 'twitch',     name: 'Twitch',       url: 'https://www.twitch.tv',               color: '#7a3fe0' },
+    { id: 'crunchyroll',name: 'Crunchyroll',  url: 'https://www.crunchyroll.com',         color: '#d96a0a' },
+    { id: 'spotify',    name: 'Spotify',      url: 'https://open.spotify.com',            color: '#14864a' },
+    { id: 'ytmusic',    name: 'YouTube Music',url: 'https://music.youtube.com',           color: '#c2185b' },
+    { id: 'plex',       name: 'Plex',         url: 'https://app.plex.tv',                 color: '#b87a00' },
+    { id: 'tubi',       name: 'Tubi',         url: 'https://tubitv.com',                  color: '#6a2fd0' },
+    { id: 'pluto',      name: 'Pluto TV',     url: 'https://pluto.tv',                    color: '#2f3a7a' }
+  ];
+  const SWATCHES = ['#e5173f','#d96a0a','#b87a00','#14864a','#0b7fc2','#1d5bd6','#5b2bd6','#c2185b','#3a3d45'];
+
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+  };
+
+  let apps     = store.get('tv.apps', DEFAULT_APPS);
+  let recent   = store.get('tv.recent', []);
+  let settings = { newTab: false, kiosk: false, fullscreen: true, ...store.get('tv.settings', {}) };
+  let theme    = store.get('tv.theme', { a: '#d6283e' });
+  let pinHash  = store.get('tv.pin', null);
+  let unlockedUntil = 0;
+
+  const THEMES = [
+    { name: 'Crimson', a: '#d6283e' }, { name: 'Ember',   a: '#ff7a1a' },
+    { name: 'Rose',    a: '#ff4fa3' }, { name: 'Violet',  a: '#8b5cf6' },
+    { name: 'Ocean',   a: '#1e90ff' }, { name: 'Emerald', a: '#10b981' },
+    { name: 'Steel',   a: '#8b95a7' }
+  ];
+  const applyTheme = () => document.documentElement.style.setProperty('--a', theme.a);
+  const applyKiosk = () => { if (!settings.kiosk) document.body.classList.remove('hide-cursor'); };
+
+  // older saved lists used the /tv address for YouTube
+  apps = apps.map(a => a.id === 'youtube' && /youtube\.com\/tv\/?$/.test(a.url) ? { ...a, url: 'https://www.youtube.com' } : a);
+
+  const saveApps = () => store.set('tv.apps', apps);
+
+  /* ---------- helpers ---------- */
+  const $ = (s, r = document) => r.querySelector(s);
+  const rowsEl = $('#rows'), modalEl = $('#modal'), appEl = $('#app');
+  const heroTitle = $('#heroTitle'), heroSub = $('#heroSub');
+
+  function el(tag, props = {}, ...kids) {
+    const n = document.createElement(tag);
+    Object.assign(n, props);
+    kids.forEach(k => n.append(k));
+    return n;
+  }
+  function btn(label, onClick, cls = '', extra = '') {
+    const b = el('button', { className: 'btn ' + cls, type: 'button' }, el('span', { textContent: label }));
+    if (extra) b.append(el('small', { textContent: extra }));
+    b.dataset.f = '';
+    b.addEventListener('click', onClick);
+    return b;
+  }
+  const host = u => { try { return new URL(u).host.replace(/^www\./, ''); } catch { return u; } };
+  const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'app';
+
+  /* ---------- clock + greeting ---------- */
+  function tick() {
+    const d = new Date();
+    $('#clock').textContent = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  }
+  setInterval(tick, 10000); tick();
+
+  function greeting() {
+    const h = new Date().getHours();
+    return h < 5 ? 'Late night' : h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
+  }
+  function showDefaultHero() {
+    heroTitle.textContent = greeting();
+    heroSub.textContent = new Date().toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
+  }
+
+  /* ---------- rendering ---------- */
+  // logo sources, tried in order: your own file in /logos, then the site's own icon
+  function logoSources(a) {
+    const list = ['logos/' + a.id + '.png'];
+    try { list.push('https://www.google.com/s2/favicons?sz=128&domain=' + new URL(a.url).hostname); } catch {}
+    return list;
+  }
+  function tileEl(a) {
+    const t = el('button', { className: 'tile', type: 'button' });
+    t.style.setProperty('--c', a.color);
+    const srcs = logoSources(a);
+    const img = el('img', { className: 'logo', alt: '', draggable: false });
+    let i = 0;
+    img.onerror = () => {
+      i++;
+      if (i < srcs.length) img.src = srcs[i];
+      else { img.remove(); t.classList.add('no-logo'); }
+    };
+    img.src = srcs[0];
+    t.append(img, el('span', { textContent: a.name }));
+    t.dataset.f = ''; t.dataset.id = a.id;
+    t.addEventListener('click', () => launch(a));
+    t.addEventListener('contextmenu', e => { e.preventDefault(); openOptions(a); });
+    return t;
+  }
+  function addTile() {
+    const t = el('button', { className: 'tile add', type: 'button', textContent: '+ Add app' });
+    t.dataset.f = ''; t.dataset.add = '';
+    t.addEventListener('click', openAdd);
+    return t;
+  }
+  function rowBlock(title, tiles) {
+    return el('section', { className: 'row-block' }, el('h2', { textContent: title }), el('div', { className: 'row' }, ...tiles));
+  }
+  function render(focusId) {
+    rowsEl.replaceChildren(rowBlock('Apps', [...apps.map(tileEl), addTile()]));
+    const rec = recent.map(id => apps.find(a => a.id === id)).filter(Boolean).slice(0, 8);
+    if (rec.length) rowsEl.append(rowBlock('Recently opened', rec.map(tileEl)));
+    const target = (focusId && $(`.tile[data-id="${CSS.escape(focusId)}"]`, rowsEl)) || $('.tile', rowsEl);
+    if (target) target.focus(); else $('#searchBtn').focus();
+  }
+
+  /* ---------- launching ---------- */
+  function launch(a) {
+    recent = [a.id, ...recent.filter(id => id !== a.id)].slice(0, 12);
+    store.set('tv.recent', recent);
+    const overlay = $('#launch');
+    overlay.textContent = 'Opening ' + a.name;
+    overlay.classList.add('on');
+    setTimeout(() => {
+      if (settings.newTab && !settings.kiosk) {
+        window.open(a.url, '_blank', 'noopener');
+        overlay.classList.remove('on');
+        render(a.id);
+      } else {
+        location.href = a.url;
+      }
+    }, 350);
+  }
+  // coming back via the browser's Back button
+  window.addEventListener('pageshow', () => $('#launch').classList.remove('on'));
+
+  /* ---------- modals ---------- */
+  let lastFocus = null, padKey = null;
+  const modalOpen = () => !modalEl.hidden;
+
+  function openModal(title, build, peek = false) {
+    if (modalEl.hidden) lastFocus = document.activeElement;
+    padKey = null;
+    const card = el('div', { className: 'card' }, el('h2', { textContent: title }));
+    card.setAttribute('role', 'dialog'); card.setAttribute('aria-modal', 'true');
+    build(card);
+    modalEl.replaceChildren(card);
+    modalEl.hidden = false;
+    modalEl.classList.toggle('peek', peek);
+    appEl.inert = true;
+    const first = $('[data-f]', card);
+    if (first) first.focus();
+  }
+  function closeModal(restore = true) {
+    modalEl.hidden = true; modalEl.replaceChildren(); padKey = null; modalEl.classList.remove('peek');
+    appEl.inert = false;
+    if (restore) {
+      if (lastFocus && document.contains(lastFocus)) lastFocus.focus();
+      else ($('.tile', rowsEl) || $('#searchBtn')).focus();
+    }
+  }
+  modalEl.addEventListener('mousedown', e => { if (e.target === modalEl) closeModal(); });
+
+  function openOptions(a) {
+    if (!guard(() => openOptions(a))) return;
+    openModal(a.name, card => {
+      card.append(
+        el('p', { className: 'hint', textContent: host(a.url) }),
+        btn('Open', () => { closeModal(false); launch(a); }),
+        btn('Move earlier', () => move(a, -1)),
+        btn('Move later', () => move(a, 1)),
+        btn('Remove', () => {
+          apps = apps.filter(x => x.id !== a.id); saveApps();
+          closeModal(false); render();
+        }, 'danger'),
+        btn('Cancel', () => closeModal())
+      );
+    });
+  }
+  function move(a, dir) {
+    const i = apps.findIndex(x => x.id === a.id), j = i + dir;
+    if (j < 0 || j >= apps.length) return;
+    [apps[i], apps[j]] = [apps[j], apps[i]];
+    saveApps(); closeModal(false); render(a.id);
+  }
+
+  function openAdd() {
+    if (!guard(openAdd)) return;
+    let color = SWATCHES[4];
+    openModal('Add app', card => {
+      const name = el('input', { className: 'field', placeholder: 'Name', maxLength: 24 });
+      const url  = el('input', { className: 'field', placeholder: 'Website address, like crunchyroll.com', inputMode: 'url' });
+      name.dataset.f = ''; url.dataset.f = '';
+      const err = el('div', { className: 'err' });
+      const sw = el('div', { className: 'swatches' });
+      SWATCHES.forEach(c => {
+        const s = el('button', { className: 'sw', type: 'button', ariaLabel: 'Tile color ' + c });
+        s.style.setProperty('--c', c); s.dataset.f = '';
+        s.setAttribute('aria-pressed', String(c === color));
+        s.addEventListener('click', () => {
+          color = c;
+          sw.querySelectorAll('.sw').forEach(x => x.setAttribute('aria-pressed', String(x === s)));
+        });
+        sw.append(s);
+      });
+      card.append(name, url, sw, err,
+        btn('Save', () => {
+          const n = name.value.trim();
+          let u = url.value.trim();
+          if (!n) { err.textContent = 'Enter a name for the app.'; name.focus(); return; }
+          if (!u) { err.textContent = 'Enter the website address.'; url.focus(); return; }
+          if (!/^https?:\/\//i.test(u)) u = 'https://' + u;
+          try { new URL(u); } catch { err.textContent = 'That address doesn’t look right. Try something like example.com.'; url.focus(); return; }
+          let id = slug(n); while (apps.some(a => a.id === id)) id += '-2';
+          apps.push({ id, name: n, url: u, color }); saveApps();
+          closeModal(false); render(id);
+        }),
+        btn('Cancel', () => closeModal())
+      );
+    });
+  }
+
+  function openSearch() {
+    openModal('Search', card => {
+      const input = el('input', { className: 'field', placeholder: 'Type an app name or something to look up', autocomplete: 'off' });
+      input.dataset.f = '';
+      const results = el('div', { style: 'display:flex;flex-direction:column;gap:.7rem' });
+      card.append(input, results);
+      const draw = () => {
+        const q = input.value.trim();
+        results.replaceChildren();
+        if (!q) return;
+        apps.filter(a => a.name.toLowerCase().includes(q.toLowerCase())).slice(0, 5)
+          .forEach(a => results.append(btn(a.name, () => { closeModal(false); launch(a); }, '', host(a.url))));
+        const enc = encodeURIComponent(q);
+        results.append(
+          btn('Search YouTube for “' + q + '”', () => go('https://www.youtube.com/results?search_query=' + enc)),
+          btn('Search the web for “' + q + '”', () => go('https://www.google.com/search?q=' + enc))
+        );
+      };
+      const go = u => { closeModal(false); launch({ id: '_search', name: 'results', url: u }); };
+      input.addEventListener('input', draw);
+    });
+  }
+
+  /* ---------- PIN lock ---------- */
+  async function hashPin(p) {
+    try {
+      const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('tvhome:' + p));
+      return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join('');
+    } catch {
+      let h = 0; for (const c of 'tvhome:' + p) h = (h * 31 + c.charCodeAt(0)) | 0;
+      return 'x' + h;
+    }
+  }
+  // returns true when the action may run now; otherwise asks for the PIN and re-runs fn
+  function guard(fn) {
+    if (!pinHash || Date.now() < unlockedUntil) return true;
+    pinPad('Enter PIN', async pin => {
+      if (await hashPin(pin) !== pinHash) return 'Wrong PIN. Try again.';
+      unlockedUntil = Date.now() + 120000;
+      fn();
+      return null;
+    });
+    return false;
+  }
+  function pinPad(title, onSubmit) {
+    openModal(title, card => {
+      let val = '', busy = false;
+      const dots = el('div', { className: 'dots' });
+      const msg = el('div', { className: 'err' });
+      const draw = () => { dots.textContent = '●'.repeat(val.length) + '○'.repeat(4 - val.length); };
+      const press = async k => {
+        if (busy) return;
+        if (k === '⌫') val = val.slice(0, -1);
+        else if (val.length < 4) val += k;
+        draw(); msg.textContent = '';
+        if (val.length === 4) {
+          busy = true;
+          const err = await onSubmit(val);
+          busy = false;
+          if (err) { msg.textContent = err; val = ''; draw(); }
+        }
+      };
+      padKey = press;
+      draw();
+      const grid = el('div', { className: 'pad' });
+      ['1','2','3','4','5','6','7','8','9','','0','⌫'].forEach(k => {
+        if (!k) { grid.append(el('div', { className: 'btn gap' })); return; }
+        grid.append(btn(k, () => press(k)));
+      });
+      card.append(dots, grid, msg, btn('Cancel', () => closeModal()));
+    });
+  }
+  function setPin() {
+    pinPad('Choose a 4-digit PIN', async first => {
+      pinPad('Enter it again', async second => {
+        if (second !== first) return 'Those didn’t match. Try again.';
+        pinHash = await hashPin(first); store.set('tv.pin', pinHash);
+        unlockedUntil = Date.now() + 120000;
+        openSettings();
+        return null;
+      });
+      return null;
+    });
+  }
+
+  /* ---------- background colours ---------- */
+  function setAccent(c) { theme = { a: c }; store.set('tv.theme', theme); applyTheme(); }
+  function openColors() {
+    openModal('Background colors', card => {
+      const marks = [];
+      const refresh = () => marks.forEach(([b, c]) => { b.lastChild.textContent = c.toLowerCase() === theme.a.toLowerCase() ? 'Selected' : ''; });
+      THEMES.forEach(t => {
+        const b = btn(t.name, () => { setAccent(t.a); custom.value = ''; refresh(); }, '', ' ');
+        const dot = el('span', { className: 'dot' }); dot.style.background = t.a;
+        b.prepend(el('span', { style: 'display:flex;align-items:center;gap:.8rem' }, dot, b.firstChild));
+        marks.push([b, t.a]); card.append(b);
+      });
+      const custom = el('input', { className: 'field', placeholder: 'Custom color, like #1e90ff', maxLength: 7 });
+      custom.dataset.f = '';
+      custom.addEventListener('input', () => {
+        const v = custom.value.trim().replace(/^#/, '');
+        if (/^[0-9a-f]{6}$/i.test(v)) { setAccent('#' + v); refresh(); }
+      });
+      card.append(custom, btn('Done', () => openSettings()));
+      refresh();
+    }, true);
+  }
+
+  /* ---------- settings ---------- */
+  function openSettings() {
+    if (!guard(openSettings)) return;
+    openModal('Settings', card => {
+      const tabBtn = btn('Open apps in', () => {
+        settings.newTab = !settings.newTab; store.set('tv.settings', settings);
+        tabBtn.lastChild.textContent = settings.newTab ? 'New tab' : 'This tab';
+      }, '', settings.newTab ? 'New tab' : 'This tab');
+      const kioskBtn = btn('Kiosk mode', () => {
+        settings.kiosk = !settings.kiosk; store.set('tv.settings', settings);
+        applyKiosk(); wakeCursor();
+        if (settings.kiosk) goFullscreen();
+        kioskBtn.lastChild.textContent = settings.kiosk ? 'On' : 'Off';
+      }, '', settings.kiosk ? 'On' : 'Off');
+      const fsBtn = btn('Fullscreen on start', () => {
+        settings.fullscreen = !settings.fullscreen; store.set('tv.settings', settings);
+        fsBtn.lastChild.textContent = settings.fullscreen ? 'On' : 'Off';
+      }, '', settings.fullscreen ? 'On' : 'Off');
+      const pinBtn = btn('PIN lock for settings', () => {
+        if (pinHash) { pinHash = null; store.set('tv.pin', null); openSettings(); }
+        else setPin();
+      }, '', pinHash ? 'On, select to remove' : 'Off');
+      card.append(
+        btn('Background colors', openColors),
+        fsBtn,
+        kioskBtn,
+        pinBtn,
+        tabBtn,
+        btn('Fullscreen', toggleFullscreen),
+        btn('Reset apps to default', () => {
+          apps = DEFAULT_APPS.map(a => ({ ...a })); recent = [];
+          saveApps(); store.set('tv.recent', recent);
+          closeModal(false); render();
+        }, 'danger'),
+        btn('Close', () => closeModal()),
+        el('p', { className: 'hint', textContent: 'Kiosk mode keeps the launcher fullscreen, hides the mouse cursor, blocks right-click and developer shortcuts, and always opens apps in this tab. A page can’t block system keys like Ctrl+W or Alt+F4, so use the kiosk-setup files for a full lockdown.' }),
+        el('p', { className: 'hint', textContent: 'Arrow keys move. Enter opens. Hold Enter or press E for app options. S searches, F toggles fullscreen, Esc goes back.' })
+      );
+    });
+  }
+
+  async function goFullscreen() {
+    try {
+      await document.documentElement.requestFullscreen({ navigationUI: 'hide' });
+      // where supported (Chrome, Edge), keep Esc, Alt+Tab and the Windows key inside the page
+      await navigator.keyboard?.lock?.(['Escape', 'AltLeft', 'AltRight', 'Tab', 'MetaLeft', 'MetaRight']);
+    } catch {}
+  }
+  function toggleFullscreen() {
+    if (document.fullscreenElement) { navigator.keyboard?.unlock?.(); document.exitFullscreen(); }
+    else goFullscreen();
+  }
+
+  /* ---------- hero follows focus ---------- */
+  document.addEventListener('focusin', e => {
+    const t = e.target.closest?.('[data-f]');
+    if (!t || modalOpen()) return;
+    t.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+    if (t.classList.contains('tile') && t.dataset.id) {
+      const a = apps.find(x => x.id === t.dataset.id);
+      if (a) {
+        heroTitle.textContent = a.name;
+        heroSub.textContent = host(a.url) + '. Press OK to open.';
+        return;
+      }
+    }
+    if (t.dataset.add !== undefined) {
+      heroTitle.textContent = 'Add an app';
+      heroSub.textContent = 'Put any website on your home screen.';
+      return;
+    }
+    showDefaultHero();
+  });
+
+  /* ---------- remote / keyboard navigation ---------- */
+  function focusables() {
+    const scope = modalOpen() ? modalEl : appEl;
+    return [...scope.querySelectorAll('[data-f]')].filter(n => n.getClientRects().length);
+  }
+  function navigate(dir) {
+    const list = focusables();
+    let cur = document.activeElement;
+    if (!list.includes(cur)) { list[0]?.focus(); return; }
+    const r = cur.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    let best = null, bestScore = Infinity;
+    for (const n of list) {
+      if (n === cur) continue;
+      const q = n.getBoundingClientRect(), dx = q.left + q.width / 2 - cx, dy = q.top + q.height / 2 - cy;
+      let primary, secondary;
+      if (dir === 'right')      { if (dx <= 4)  continue; primary = dx;  secondary = Math.abs(dy); }
+      else if (dir === 'left')  { if (dx >= -4) continue; primary = -dx; secondary = Math.abs(dy); }
+      else if (dir === 'down')  { if (dy <= 4)  continue; primary = dy;  secondary = Math.abs(dx); }
+      else                      { if (dy >= -4) continue; primary = -dy; secondary = Math.abs(dx); }
+      const score = primary + secondary * (dir === 'left' || dir === 'right' ? 4 : 1.5);
+      if (score < bestScore) { bestScore = score; best = n; }
+    }
+    if (best) best.focus();
+  }
+
+  const KEYS = { ArrowRight: 'right', ArrowLeft: 'left', ArrowDown: 'down', ArrowUp: 'up' };
+  let holdTimer = null, held = false;
+
+  document.addEventListener('keydown', e => {
+    if (settings.kiosk) {
+      const k = e.key.toLowerCase();
+      if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['i', 'j', 'c'].includes(k)) ||
+          (e.ctrlKey && ['u', 's', 'p'].includes(k))) { e.preventDefault(); return; }
+    }
+    if (e.key === 'BrowserHome' || (e.key === 'Home' && e.target.tagName !== 'INPUT')) { e.preventDefault(); goHome(); return; }
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    if (padKey && modalOpen()) {
+      if (/^[0-9]$/.test(e.key)) { e.preventDefault(); padKey(e.key); return; }
+      if (e.key === 'Backspace') { e.preventDefault(); padKey('⌫'); return; }
+    }
+    const inField = e.target.tagName === 'INPUT';
+    const dir = KEYS[e.key];
+
+    if (dir) {
+      if (inField && (dir === 'left' || dir === 'right')) return;
+      e.preventDefault(); navigate(dir); return;
+    }
+    if (e.key === 'Escape' || (e.key === 'Backspace' && !inField)) {
+      if (modalOpen()) { e.preventDefault(); closeModal(); }
+      return;
+    }
+    if (inField) {
+      if (e.key === 'Enter') { e.preventDefault(); navigate('down'); }
+      return;
+    }
+    const tile = e.target.closest?.('.tile[data-id]');
+    if (e.key === 'Enter' && tile) {            // hold Enter for options
+      e.preventDefault();
+      if (!e.repeat) {
+        held = false;
+        holdTimer = setTimeout(() => { held = true; openOptions(apps.find(a => a.id === tile.dataset.id)); }, 650);
+      }
+      return;
+    }
+    if (modalOpen()) return;
+    if (tile && (e.key === 'e' || e.key === 'E' || e.key === 'ContextMenu' || e.key === 'm')) {
+      e.preventDefault(); openOptions(apps.find(a => a.id === tile.dataset.id)); return;
+    }
+    if (e.key === 'f' || e.key === 'F') { e.preventDefault(); toggleFullscreen(); }
+    if (e.key === 's' || e.key === 'S' || e.key === '/') { e.preventDefault(); openSearch(); }
+  });
+  document.addEventListener('keyup', e => {
+    if (e.key !== 'Enter') return;
+    clearTimeout(holdTimer);
+    const tile = e.target.closest?.('.tile[data-id]');
+    if (tile && !held && !modalOpen()) tile.click();
+    held = false;
+  });
+
+  function goHome() {
+    if (modalOpen()) closeModal(false);
+    rowsEl.scrollTo({ top: 0, behavior: 'smooth' });
+    rowsEl.querySelectorAll('.row').forEach(r => r.scrollTo({ left: 0, behavior: 'smooth' }));
+    ($('.tile', rowsEl) || $('#searchBtn')).focus();
+  }
+  $('#homeBtn').addEventListener('click', goHome);
+  $('#searchBtn').addEventListener('click', openSearch);
+  $('#setBtn').addEventListener('click', openSettings);
+  $('#fsBtn').addEventListener('click', toggleFullscreen);
+
+  /* ---------- kiosk helpers ---------- */
+  let cursorTimer;
+  function wakeCursor() {
+    document.body.classList.remove('hide-cursor');
+    clearTimeout(cursorTimer);
+    if (settings.kiosk) cursorTimer = setTimeout(() => document.body.classList.add('hide-cursor'), 3000);
+  }
+  document.addEventListener('mousemove', wakeCursor);
+  document.addEventListener('contextmenu', e => { if (settings.kiosk) e.preventDefault(); });
+  // browsers only allow fullscreen after a key press or click, so re-enter on the next one
+  let triedFs = false;
+  ['keydown', 'pointerdown'].forEach(t => document.addEventListener(t, () => {
+    if (document.fullscreenElement) return;
+    if (settings.kiosk || (settings.fullscreen && !triedFs)) { triedFs = true; goFullscreen(); }
+  }, true));
+
+  /* ---------- start ---------- */
+  applyTheme();
+  showDefaultHero();
+  render();
+  wakeCursor();
+})();
+</script>
+</body>
+</html>
