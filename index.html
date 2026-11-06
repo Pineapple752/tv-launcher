@@ -130,11 +130,11 @@
 
   /* rows */
   #rows { flex: 1; overflow-y: auto; scrollbar-width: none; padding-bottom: 8vh; }
-  #rows::-webkit-scrollbar, .row::-webkit-scrollbar { display: none; }
+  #rows::-webkit-scrollbar { display: none; }
   .row-block h2 { font-size: 1.25rem; font-weight: 700; padding: 0 var(--gutter); margin-top: .6rem; }
   .row {
-    display: flex; gap: 1.1rem; overflow-x: auto; scrollbar-width: none;
-    padding: 1.4rem var(--gutter) 1.6rem; scroll-padding-inline: var(--gutter);
+    display: flex; flex-wrap: wrap; gap: 1.4rem 1.1rem;
+    padding: 1.4rem var(--gutter) 1.6rem;
   }
   .tile {
     flex: 0 0 15rem; aspect-ratio: 16 / 9; border-radius: .9rem;
@@ -355,6 +355,7 @@
     const m = e.data;
     if (!m || typeof m !== 'object') return;
     if (m.type === 'config' && Array.isArray(m.allowed)) allowed = m.allowed.map(d => String(d).toLowerCase());
+    if (m.type === 'home') goHome();            // Ctrl+H while already on the launcher
     if (m.type === 'blocked') {
       endLaunch();
       notify('“' + String(m.host) + '” isn’t on this TV’s allowed list. Add it to config.json to open it.');
@@ -673,7 +674,7 @@
         pinBtn,
         resetBtn,
         btn('Close', () => closeModal()),
-        el('p', { className: 'hint', textContent: 'Arrow keys move. Enter opens. Hold Enter or press E for app options. S searches, Home returns here, Esc goes back.' })
+        el('p', { className: 'hint', textContent: 'Click or use the arrow keys and Enter to open an app. Right-click or press E for app options. S searches, Ctrl+H returns here from any app, Esc goes back.' })
       );
     });
   }
@@ -687,7 +688,7 @@
       const a = apps.find(x => x.id === t.dataset.id);
       if (a) {
         heroTitle.textContent = a.name;
-        heroSub.textContent = host(a.url) + '. Press OK to open.';
+        heroSub.textContent = host(a.url) + '. Click or press Enter to open.';
         return;
       }
     }
@@ -725,13 +726,11 @@
   }
 
   const KEYS = { ArrowRight: 'right', ArrowLeft: 'left', ArrowDown: 'down', ArrowUp: 'up' };
-  let holdTimer = 0, held = false, enterTile = null;
-
   document.addEventListener('keydown', e => {
-    if (e.key === 'BrowserHome' || (e.key === 'Home' && e.target.tagName !== 'INPUT')) { e.preventDefault(); goHome(); return; }
+    if (e.key === 'Home' && e.target.tagName !== 'INPUT') { e.preventDefault(); goHome(); return; }
     if (e.altKey || e.ctrlKey || e.metaKey) return;
     const inField = e.target.tagName === 'INPUT';
-    // holding OK must never re-press whatever button is focused (for example "Open" right after a long press)
+    // holding Enter must never keep re-pressing whatever button is focused
     if (e.key === 'Enter' && e.repeat && !inField) { e.preventDefault(); return; }
     if (padKey && modalOpen()) {
       if (/^[0-9]$/.test(e.key)) { e.preventDefault(); padKey(e.key); return; }
@@ -751,28 +750,12 @@
       if (e.key === 'Enter') { e.preventDefault(); navigate('down'); }
       return;
     }
-    const tile = e.target.closest?.('.tile[data-id]');
-    if (e.key === 'Enter' && tile) {            // tap opens the app, hold opens its options
-      e.preventDefault();
-      enterTile = tile; held = false;
-      clearTimeout(holdTimer);
-      holdTimer = setTimeout(() => { held = true; openOptions(apps.find(a => a.id === tile.dataset.id)); }, 650);
-      return;
-    }
     if (modalOpen()) return;
-    if (tile && (e.key === 'e' || e.key === 'E' || e.key === 'ContextMenu' || e.key === 'm')) {
+    const tile = e.target.closest?.('.tile[data-id]');
+    if (tile && (e.key === 'e' || e.key === 'E' || e.key === 'ContextMenu')) {
       e.preventDefault(); openOptions(apps.find(a => a.id === tile.dataset.id)); return;
     }
     if (e.key === 's' || e.key === 'S' || e.key === '/') { e.preventDefault(); openSearch(); }
-  });
-  document.addEventListener('keyup', e => {
-    if (e.key !== 'Enter') return;
-    clearTimeout(holdTimer);
-    // only a press that started on this tile may open it, so pressing Enter on a
-    // dialog button can't "click through" to the tile underneath when the dialog closes
-    const t = enterTile; enterTile = null;
-    if (t && !held && !modalOpen() && document.activeElement === t) t.click();
-    held = false;
   });
 
   function goHome() {
